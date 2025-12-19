@@ -10,7 +10,9 @@ export const useSocket = () => {
 
     useEffect(() => {
         if (user && !socketRef.current) {
-            const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+            // Socket.io needs base URL, not API path
+            const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace('/api/v1', '');
+            const socket = io(baseUrl, {
                 withCredentials: true,
                 transports: ['websocket'],
             });
