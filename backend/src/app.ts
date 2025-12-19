@@ -7,6 +7,8 @@ import { Server } from 'socket.io';
 
 export const app = express();
 
+app.set('trust proxy', 1); // Trust Render's load balancer for secure cookies
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
