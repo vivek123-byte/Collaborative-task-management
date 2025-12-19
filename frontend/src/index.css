@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-primary: 99 102 241;
+        --color-primary-hover: 79 70 229;
+    }
+
+    .dark {
+        /* Rich dark backgrounds */
+        --bg-primary: 15 23 42;
+        --bg-secondary: 30 41 59;
+        --bg-tertiary: 51 65 85;
+
+        /* Vibrant accents */
+        --accent-primary: 139 92 246;
+        --accent-secondary: 168 85 247;
+
+        /* Text colors */
+        --text-primary: 248 250 252;
+        --text-secondary: 203 213 225;
+        --text-muted: 148 163 184;
+    }
+}
