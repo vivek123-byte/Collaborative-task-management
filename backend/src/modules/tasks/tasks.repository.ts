@@ -20,9 +20,12 @@ export class TaskRepository {
     }
 
     async findAll(filters: TaskFilterInput) {
+        const { sortBy, sortOrder, ...where } = filters;
         return prisma.task.findMany({
-            where: filters,
-            orderBy: { dueDate: 'asc' },
+            where,
+            orderBy: {
+                [sortBy || 'dueDate']: sortOrder || 'asc'
+            },
             include: {
                 creator: { select: { id: true, name: true } },
                 assignedTo: { select: { id: true, name: true } },
@@ -66,12 +69,15 @@ export class TaskRepository {
     }
 
     async findAssignedToUser(userId: string, filters: TaskFilterInput) {
+        const { sortBy, sortOrder, ...where } = filters;
         return prisma.task.findMany({
             where: {
                 assignedToId: userId,
-                ...filters
+                ...where
             },
-            orderBy: { dueDate: 'asc' },
+            orderBy: {
+                [sortBy || 'dueDate']: sortOrder || 'asc'
+            },
             include: {
                 creator: { select: { id: true, name: true } },
                 assignedTo: { select: { id: true, name: true } },
@@ -80,12 +86,15 @@ export class TaskRepository {
     }
 
     async findCreatedByUser(userId: string, filters: TaskFilterInput) {
+        const { sortBy, sortOrder, ...where } = filters;
         return prisma.task.findMany({
             where: {
                 creatorId: userId,
-                ...filters
+                ...where
             },
-            orderBy: { dueDate: 'asc' },
+            orderBy: {
+                [sortBy || 'dueDate']: sortOrder || 'asc'
+            },
             include: {
                 creator: { select: { id: true, name: true } },
                 assignedTo: { select: { id: true, name: true } },
@@ -94,6 +103,7 @@ export class TaskRepository {
     }
 
     async findOverdueForUser(userId: string, filters: TaskFilterInput) {
+        const { sortBy, sortOrder, ...where } = filters;
         return prisma.task.findMany({
             where: {
                 OR: [
@@ -102,9 +112,11 @@ export class TaskRepository {
                 ],
                 dueDate: { lt: new Date() },
                 status: { not: 'COMPLETED' },
-                ...filters
+                ...where
             },
-            orderBy: { dueDate: 'asc' },
+            orderBy: {
+                [sortBy || 'dueDate']: sortOrder || 'asc'
+            },
             include: {
                 creator: { select: { id: true, name: true } },
                 assignedTo: { select: { id: true, name: true } },
@@ -126,5 +138,9 @@ export class TaskRepository {
         return prisma.notification.deleteMany({
             where: { taskId }
         });
+    }
+
+    async createAuditLog(data: { userId: string; taskId: string; action: string; details?: string }) {
+        return prisma.auditLog.create({ data });
     }
 }

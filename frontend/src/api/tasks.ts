@@ -37,12 +37,16 @@ export type UpdateTaskInput = Partial<CreateTaskInput>;
 export interface TaskFilters {
     status?: string;
     priority?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
 }
 
 export const getTasks = async (filters?: TaskFilters) => {
     const params = new URLSearchParams();
     if (filters?.status) params.append('status', filters.status);
     if (filters?.priority) params.append('priority', filters.priority);
+    if (filters?.sortBy) params.append('sortBy', filters.sortBy);
+    if (filters?.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const response = await client.get<Task[]>(`/tasks?${params.toString()}`);
     return response.data;

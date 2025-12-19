@@ -12,7 +12,8 @@ describe('TaskService', () => {
     let service: TaskService;
     let repo: jest.Mocked<TaskRepository>;
     const ioEmit = jest.fn();
-    const ioTo = jest.fn(() => ({ emit: jest.fn() }));
+    const ioToEmit = jest.fn();
+    const ioTo = jest.fn(() => ({ emit: ioToEmit }));
 
     beforeEach(() => {
         repo = new MockRepo() as any;
@@ -24,8 +25,9 @@ describe('TaskService', () => {
             to: ioTo,
         } as any);
 
-        ioEmit.mockReset();
-        ioTo.mockReset();
+        ioEmit.mockClear();
+        ioTo.mockClear();
+        ioToEmit.mockClear();
     });
 
     it('updateTask throws 404 when task not found', async () => {

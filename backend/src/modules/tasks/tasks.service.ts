@@ -10,6 +10,10 @@ export class TaskService {
         this.repository = new TaskRepository();
     }
 
+    /**
+     * Creates a new task and broadcasts it to everyone using Socket.io.
+     * If someone else is assigned, we also trigger a specific notification for them.
+     */
     async createTask(userId: string, data: CreateTaskInput) {
         const task = await this.repository.create({ ...data, creatorId: userId });
 
@@ -23,18 +27,33 @@ export class TaskService {
         return task;
     }
 
+    /**
+     * Fetch all tasks matching the given filters (status, priority).
+     * Used for the main task list view.
+     */
     async getTasks(filters: TaskFilterInput) {
         return this.repository.findAll(filters);
     }
 
+    /**
+     * Gets tasks specifically assigned to the current user.
+     * Useful for the "Assigned to Me" section in the dashboard.
+     */
     async getTasksAssignedToUser(userId: string, filters: TaskFilterInput) {
         return this.repository.findAssignedToUser(userId, filters);
     }
 
+    /**
+     * Helper to find tasks the user actually created themselves.
+     */
     async getTasksCreatedByUser(userId: string, filters: TaskFilterInput) {
         return this.repository.findCreatedByUser(userId, filters);
     }
 
+    /**
+     * Finds tasks that are past their due date and not yet completed.
+     * Checks both created by and assigned to the user.
+     */
     async getOverdueTasks(userId: string, filters: TaskFilterInput) {
         return this.repository.findOverdueForUser(userId, filters);
     }
@@ -43,6 +62,10 @@ export class TaskService {
         return this.repository.findById(id);
     }
 
+    /**
+     * Updates an existing task and notifies everyone of the change.
+     * If the assignee changes, we send a targeted notification to the new person.
+     */
     async updateTask(id: string, data: UpdateTaskInput, userId: string) {
         const oldTask = await this.repository.findById(id);
         if (!oldTask) throw new AppError('Task not found', 404);
@@ -52,6 +75,15 @@ export class TaskService {
         const io = getSocketIO();
         io.emit('task.updated', updatedTask);
 
+        if (data.status && data.status !== oldTask.status) {
+            await this.repository.createAuditLog({
+                userId,
+                taskId: id,
+                action: 'STATUS_UPDATE',
+                details: `Status changed from ${oldTask.status} to ${data.status}`
+            });
+        }
+
         if (data.assignedToId && data.assignedToId !== oldTask.assignedToId && data.assignedToId !== userId) {
             await this.notifyAssignment(data.assignedToId, id);
         }
@@ -59,6 +91,10 @@ export class TaskService {
         return updatedTask;
     }
 
+    /**
+     * Deletes a task. Only the original creator is allowed to do this.
+     * Also cleans up any related notifications to keep the DB clean.
+     */
     async deleteTask(id: string, userId: string) {
         const task = await this.repository.findById(id);
         if (!task) throw new AppError('Task not found', 404);

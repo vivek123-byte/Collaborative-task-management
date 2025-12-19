@@ -18,6 +18,7 @@ model User {
   createdTasks  Task[]         @relation("CreatedTasks")
   assignedTasks Task[]         @relation("AssignedTasks")
   notifications Notification[]
+  auditLogs     AuditLog[]
 }
 
 model Task {
@@ -37,6 +38,7 @@ model Task {
   updatedAt    DateTime @updatedAt
   
   notifications Notification[]
+  auditLogs     AuditLog[]
 }
 
 model Notification {
@@ -49,6 +51,19 @@ model Notification {
   
   user      User     @relation(fields: [userId], references: [id])
   task      Task     @relation(fields: [taskId], references: [id])
+}
+
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  details   String?
+  userId    String
+  taskId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
 
 enum Priority {

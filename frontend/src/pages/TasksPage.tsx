@@ -18,35 +18,18 @@ const TasksPage: React.FC = () => {
     const [filterPriority, setFilterPriority] = useState<string>('');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-    // Fetch all tasks (no server-side filtering)
+    // Server-side filtering and sorting
     const { data: tasks, isLoading } = useQuery({
-        queryKey: ['tasks'], // Remove filters from query key to cache all tasks
-        queryFn: () => getTasks({}),
+        queryKey: ['tasks', filterStatus, filterPriority, sortOrder],
+        queryFn: () => getTasks({
+            status: filterStatus || undefined,
+            priority: filterPriority || undefined,
+            sortBy: 'dueDate',
+            sortOrder,
+        }),
     });
 
-    // Client-side filtering and sorting
-    const processedTasks = React.useMemo(() => {
-        if (!tasks) return [];
-
-        let result = [...tasks];
-
-        // 1. Filter
-        if (filterStatus) {
-            result = result.filter(task => task.status === filterStatus);
-        }
-        if (filterPriority) {
-            result = result.filter(task => task.priority === filterPriority);
-        }
-
-        // 2. Sort by Due Date
-        result.sort((a, b) => {
-            const dateA = new Date(a.dueDate).getTime();
-            const dateB = new Date(b.dueDate).getTime();
-            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-        });
-
-        return result;
-    }, [tasks, filterStatus, filterPriority, sortOrder]);
+    const processedTasks = tasks || [];
 
     const createMutation = useMutation({
         mutationFn: createTask,

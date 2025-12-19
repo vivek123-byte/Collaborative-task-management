@@ -9,6 +9,10 @@ export class AuthController {
         this.authService = new AuthService();
     }
 
+    /**
+     * Registers a new user.
+     * @param req Body must contain RegisterDto.
+     */
     register = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const user = await this.authService.register(req.body);
@@ -18,6 +22,9 @@ export class AuthController {
         }
     };
 
+    /**
+     * Authenticates a user.
+     */
     login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { user, token } = await this.authService.login(req.body);
@@ -35,11 +42,17 @@ export class AuthController {
         }
     };
 
+    /**
+     * Logs out the user by clearing the auth cookie.
+     */
     logout = (req: Request, res: Response) => {
         res.clearCookie('token');
         res.json({ message: 'Logged out successfully' });
     };
 
+    /**
+     * Returns the current authenticated user's profile.
+     */
     me = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;
@@ -53,6 +66,9 @@ export class AuthController {
         }
     };
 
+    /**
+     * Updates the current user's profile information.
+     */
     updateMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;

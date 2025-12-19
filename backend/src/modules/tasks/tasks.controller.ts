@@ -10,6 +10,11 @@ export class TaskController {
         this.service = new TaskService();
     }
 
+    /**
+     * Creates a new task.
+     * @param req Body must contain CreateTaskInput (title, priority, etc.)
+     * @param res Returns the created task.
+     */
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;
@@ -21,6 +26,10 @@ export class TaskController {
         }
     };
 
+    /**
+     * Retrieves tasks with optional filtering and sorting.
+     * @param req Query params: status, priority, sortBy, sortOrder.
+     */
     findAll = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const filters = TaskFilterDto.parse(req.query);
@@ -31,6 +40,9 @@ export class TaskController {
         }
     };
 
+    /**
+     * Get tasks assigned to the current user.
+     */
     findAssignedToMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;
@@ -44,6 +56,9 @@ export class TaskController {
         }
     };
 
+    /**
+     * Get tasks created by the current user.
+     */
     findCreatedByMe = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;
@@ -57,6 +72,9 @@ export class TaskController {
         }
     };
 
+    /**
+     * Get overdue tasks for the current user.
+     */
     findOverdue = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const userId = req.userId;
@@ -70,6 +88,9 @@ export class TaskController {
         }
     };
 
+    /**
+     * Get a single task by ID.
+     */
     findOne = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const task = await this.service.getTask(req.params.id);
