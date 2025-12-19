@@ -8,8 +8,8 @@ import { Server } from 'socket.io';
 export const app = express();
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
 }));
 app.use(helmet());
 app.use(express.json());
@@ -26,8 +26,12 @@ app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/users', userRoutes);
 
+app.get('/', (req, res) => {
+  res.send('Ablespace API is running successfully');
+});
+
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
+  res.json({ status: 'ok' });
 });
 
 app.use(errorHandler);
